@@ -1,0 +1,15 @@
+{
+    "term": "Fall 2020",
+    "courses": [
+        "ELEC 2501",
+        "SYSC 2006",
+        "MATH 1005",
+        "COMP 2804"
+    ],
+    "electives": [
+        "PHIL 1301",
+        "GEOG 1020",
+        "ARTH 2601"
+    ],
+    "electiveCount": 1
+}
