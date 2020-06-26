@@ -3,12 +3,12 @@ import re
 import json
 import datetime
 from itertools import combinations
-from collections import defaultdict
 from typing import *
 import arrow
 from arrow import Arrow
 import pandas as pd
 import timeit
+from utilities import *
 
 def preprocess(course_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -128,54 +128,21 @@ def generate_with_electives(course_df: pd.DataFrame, conflict_graph: Dict[str, S
     schedules = set()
     for combination in combinations(elective_requirements, elective_count):
         combination = list(combination)
-        new_schedules = set(flatten(generate_schedules(df, conflicts, [], requirements + combination)))
+        new_schedules = set(flatten(generate_schedules(course_df, conflict_graph, [], requirements + combination)))
         print(len(new_schedules))
         schedules = schedules.union(new_schedules)
     print(len(schedules))
     return schedules
 
-def length_histogram(schedules: Set[FrozenSet[str]]) -> DefaultDict[int, int]:
+def schedule(course_df_path: str, query_path: str) -> Set[FrozenSet[str]]:
     """
-    Returns a histogram of number of courses for each schedule in
-    schedules.
-    """
-    histogram = defaultdict(int)
-    for schedule in schedules:
-        histogram[len(schedule)] += 1
-    return histogram
 
-def flatten_once(lst: List) -> List:
     """
-    Flattens the list lst one level.
-    """
-    return [item for sublist in lst for item in sublist]
-
-def can_flatten(lst: List) -> List:
-    """
-    Returns True if and only if the list lst contains only elements that
-    are themselves lists.
-    """
-    for element in lst:
-        if not isinstance(element, list):
-            return False
-    return True
-
-def flatten(lst: List) -> List:
-    """
-    Flattens the list lst as much as possible, ie until at least one of its elements
-    is not a list. Returns a copy.
-    """
-    copied = lst.copy()
-    while can_flatten(copied):
-        copied = flatten_once(copied)
-    return copied
-
-if __name__ == "__main__":
-    df = pd.read_csv("results.csv")
+    df = pd.read_csv(course_df_path)
     df = preprocess(df)
     conflicts = generate_conflicts_graph(df)
     print(df)
-    with open("query.json", "r") as f:
+    with open(query_path, "r") as f:
         query = json.load(f)
         f.close()
     courses = query["courses"]
@@ -184,4 +151,8 @@ if __name__ == "__main__":
     requirements = [list(get_lecture_set(df, course)) for course in courses]
     elective_requirements = [list(get_lecture_set(df, elective)) for elective in electives]
     schedules = generate_with_electives(df, conflicts, requirements, elective_requirements, elective_count)
-    print(length_histogram(schedules))
+    return schedules
+
+if __name__ == "__main__":
+    schedules = schedule("results.csv", "query.json")
+    print(schedules)
