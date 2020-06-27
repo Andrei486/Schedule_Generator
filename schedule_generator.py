@@ -51,7 +51,8 @@ def is_conflict(course_df: pd.DataFrame, course1: str, course2: str) -> bool:
         return ((c1.Start > c2.Start and c1.Start < c2.End)\
             or (c1.End > c2.Start and c1.End < c2.End)
             or (c2.End > c1.Start and c2.End < c1.End)
-            or (c2.Start > c1.Start and c2.Start < c1.End))
+            or (c2.Start > c1.Start and c2.Start < c1.End)
+            or (c1.Start == c2.Start and c1.End == c2.End))
 
 def generate_conflicts_graph(course_df: pd.DataFrame) -> Dict[str, Set[str]]:
     """
@@ -87,7 +88,6 @@ def generate_schedules(course_df: pd.DataFrame, conflict_graph: Dict[str, Set[st
     # If nothing more is required, don't add any more courses
     if requirements == []:
         return frozenset(already_selected)
-    
     # Otherwise, select one of the remaining requirements (doesn't matter which)
     # and try adding in all its courses (separately).
     schedules = []
@@ -128,9 +128,10 @@ def generate_with_electives(course_df: pd.DataFrame, conflict_graph: Dict[str, S
     schedules = set()
     for combination in combinations(elective_requirements, elective_count):
         combination = list(combination)
-        new_schedules = set(flatten(generate_schedules(course_df, conflict_graph, [], requirements + combination)))
-        print(len(new_schedules))
-        schedules = schedules.union(new_schedules)
+        new_schedules = generate_schedules(course_df, conflict_graph, [], requirements + combination)
+        flattened = set(flatten(new_schedules))
+        print(len(flattened))
+        schedules = schedules.union(flattened)
     print(len(schedules))
     return schedules
 
@@ -153,6 +154,31 @@ def schedule(course_df_path: str, query_path: str) -> Set[FrozenSet[str]]:
     schedules = generate_with_electives(df, conflicts, requirements, elective_requirements, elective_count)
     return schedules
 
+def coverage_sample(schedules: Set[FrozenSet[str]], size: int) -> Set[FrozenSet[str]]:
+    """
+    Returns a sample of schedules from schedules of size size which has the
+    maximum coverage possible; ie, contains as many different sections as possible.
+    """
+    
+    selected = set()
+    while len(selected) < size:
+        # Find the current coverage.
+        coverage = set()
+        for s in selected:
+            coverage = coverage.union(s)
+        # Find the schedule which gives the best coverage when added.
+        best_schedule = set()
+        best_union = -1 # So a schedule will be added even if it adds no coverage.
+        for s in schedules:
+            # Don't add a schedule twice.
+            if s not in selected:
+                new_union = len(coverage.union(s))
+                if new_union > best_union:
+                    best_union = new_union
+                    best_schedule = s
+        selected.add(frozenset(best_schedule))
+    return selected
+
 if __name__ == "__main__":
     schedules = schedule("results.csv", "query.json")
-    print(schedules)
+    print(coverage_sample(schedules, 5))

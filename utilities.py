@@ -18,25 +18,40 @@ def flatten_once(lst: List) -> List:
     """
     return [item for sublist in lst for item in sublist]
 
-def can_flatten(lst: List) -> List:
+def contains_list(lst: List) -> List:
     """
-    Returns True if and only if the list lst contains only elements that
-    are themselves lists.
+    Returns True if and only if the list lst contains at least
+    one element which is itself a list.
     """
     for element in lst:
-        if not isinstance(element, list):
-            return False
-    return True
+        if isinstance(element, list):
+            return True
+    return False
 
 def flatten(lst: List) -> List:
     """
     Flattens the list lst as much as possible, ie until at least one of its elements
     is not a list. Returns a copy.
     """
-    copied = lst.copy()
-    while can_flatten(copied):
-        copied = flatten_once(copied)
-    return copied
+    if not isinstance(lst, list):
+        # If lst is not a list, it is a single element, so it is flattened
+        return [lst]
+    elif contains_list(lst):
+        # If lst contains more lists, flatten those
+        flat = []
+        for item in lst:
+            flat.extend(flatten(item))
+        return flat
+    else:
+        # If lst is a list but contains no others then it is flattened
+        return lst
+
+def remove_incomplete(schedules: Set[FrozenSet[str]]) -> Set[FrozenSet[str]]:
+    """
+    Removes all incomplete schedules from schedules, returning
+    the remaining set of schedules.
+    """
+    return set(schedule for schedule in schedules if not schedule == "incomplete")
 
 def to_dataframe(schedules: Set[FrozenSet[str]]) -> pd.DataFrame:
     """
