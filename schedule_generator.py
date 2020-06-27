@@ -52,7 +52,7 @@ def is_conflict(course_df: pd.DataFrame, course1: str, course2: str) -> bool:
             or (c1.End > c2.Start and c1.End < c2.End)
             or (c2.End > c1.Start and c2.End < c1.End)
             or (c2.Start > c1.Start and c2.Start < c1.End)
-            or (c1.Start == c2.Start and c1.End == c2.End))
+            or (c1.Start == c2.Start or c1.End == c2.End))
 
 def generate_conflicts_graph(course_df: pd.DataFrame) -> Dict[str, Set[str]]:
     """
