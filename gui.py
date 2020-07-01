@@ -135,7 +135,7 @@ class CourseSelector(tk.Frame):
                 column=2, columnspan=2, padx=4, pady=4)
         new_course_frame.pack(side=tk.TOP)
 
-        course_list = tkst.ScrolledText(self, wrap=tk.WORD, width=10, height=10)
+        course_list = tkst.ScrolledText(self, wrap=tk.WORD, width=10, height=5)
         course_list.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
         self.course_list = course_list
     
@@ -145,7 +145,7 @@ class CourseSelector(tk.Frame):
         """
         if number and subj:
             existing_courses = self.get_courses()
-            self.write_courses(existing_courses + [f"{subj} {number}"])
+            self.write_courses(existing_courses + [f"{subj[0:4]} {number[0:4]}"])
         return
 
     def remove_course(self) -> None:
@@ -172,12 +172,48 @@ class CourseSelector(tk.Frame):
         Returns the list of selected courses.
         """
         return [course for course in self.course_list.get(1.0, tk.END).splitlines() if course]
+    
+class SectionSelector(CourseSelector):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        new_course_frame = tk.Frame(self)
+        tk.Label(new_course_frame, text="Course Subject (4 letters)").grid(row=0, column=0, padx=4, pady=4)
+        course_subj = tk.Entry(new_course_frame)
+        course_subj.grid(row=0, column=1, padx=4, pady=4)
+        tk.Label(new_course_frame, text="Course Number (4 digits)").grid(row=0, column=2, padx=4, pady=4)
+        course_number = tk.Entry(new_course_frame)
+        course_number.grid(row=0, column=3, padx=4, pady=4)
+        tk.Label(new_course_frame, text="Course Section").grid(row=0, column=4, padx=4, pady=4)
+        section_id = tk.Entry(new_course_frame)
+        section_id.grid(row=0, column=5, padx=4, pady=4)
+        tk.Button(new_course_frame, text="Add Course",\
+            command=lambda: self.add_course(course_subj.get(), course_number.get(), section_id.get())).grid(row=1,\
+                column=0, columnspan=3, padx=4, pady=4)
+        tk.Button(new_course_frame, text="Remove Last Course",\
+            command=lambda: self.remove_course()).grid(row=1,\
+                column=3, columnspan=3, padx=4, pady=4)
+        new_course_frame.pack(side=tk.TOP)
+
+        course_list = tkst.ScrolledText(self, wrap=tk.WORD, width=10, height=5)
+        course_list.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        
+        self.course_list = course_list
+    
+    def add_course(self, subj: str, number: str, section: str) -> None:
+        """
+        Adds the section course to the list of courses in element.
+        """
+        if number and subj:
+            existing_courses = self.get_courses()
+            self.write_courses(existing_courses + [f"{subj[0:4]} {number[0:4]} {section}"])
+        return
 
 def make_query() -> tk.Toplevel:
     
     def activate() -> None:
         courses = course_selection.get_courses()
         electives = elective_selection.get_courses()
+        prohibited = prohibited_selection.get_courses()
         term = term_selector.get()
         elective_count = elective_count_selector.get()
         elective_count = int(elective_count) if elective_count else 1
@@ -195,6 +231,7 @@ def make_query() -> tk.Toplevel:
             
             query_object = {"courses": courses,\
                 "electives": electives,
+                "prohibited": prohibited,
                 "electiveCount": elective_count,
                 "term": term}
             
@@ -218,6 +255,12 @@ def make_query() -> tk.Toplevel:
 
     elective_selection = CourseSelector(master)
     elective_selection.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+    # Make UI for choosing a list of prohibited sections
+    tk.Label(master, 
+            text="Add prohibited sections below, or in the text area on a new line. Use sparingly.", justify=tk.LEFT).pack(side=tk.TOP, fill=tk.X)
+    prohibited_selection = SectionSelector(master)
+    prohibited_selection.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
     extra_options = tk.Frame(master)
     tk.Label(extra_options, text="Academic term (e.g., Fall 2020)").grid(row=0, column=0)

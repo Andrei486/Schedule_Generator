@@ -1,6 +1,7 @@
 from typing import *
 from collections import defaultdict
 import pandas as pd
+from tkinter import *
 
 def length_histogram(schedules: Set[FrozenSet[str]]) -> DefaultDict[int, int]:
     """
@@ -11,6 +12,21 @@ def length_histogram(schedules: Set[FrozenSet[str]]) -> DefaultDict[int, int]:
     for schedule in schedules:
         histogram[len(schedule)] += 1
     return histogram
+
+def section_counts(schedules: Set[FrozenSet[str]]) -> List[Tuple[str, int]]:
+    """
+    Returns a list where each element is a tuple, the first element of
+    which is a course section name and the second element of which is
+    the number of schedules that the course occurs in.
+    """
+    course_counts = defaultdict(int)
+    for schedule in schedules:
+        for course in schedule:
+            course_counts[course] += 1
+    count_list = [item for item in course_counts.items()]
+    count_list.sort(key=lambda t: t[1], reverse=True)
+    count_list.sort(key=lambda t: t[0][:8])
+    return count_list
 
 def flatten_once(lst: List) -> List:
     """

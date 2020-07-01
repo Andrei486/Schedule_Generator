@@ -29,7 +29,7 @@ def get_lecture_set(course_df: pd.DataFrame, courseID: str) -> Set[str]:
     lecture_sections = set()
     course_df.sort_index()
     for section_name in course_df.index:
-        if courseID in section_name and course_df.loc[section_name]["Type"] == "Lecture":
+        if courseID in section_name and course_df.loc[section_name]["Type"] in {"Lecture", "Seminar"}:
             lecture_sections.add(section_name)
     return lecture_sections
 
@@ -69,7 +69,7 @@ def generate_conflicts_graph(course_df: pd.DataFrame) -> Dict[str, Set[str]]:
     
     return graph
 
-def get_allowed_courses(conflict_graph: Dict[str, Set[str]], already_selected: Set[str]) -> Set[str]:
+def get_allowed_courses(conflict_graph: Dict[str, Set[str]], already_selected: Set[str], prohibited: Set[str]) -> Set[str]:
     """
     Returns the set of courses in course_df that do not conflict with any course names in
     already_selected, according to the graph conflict_graph.
@@ -81,7 +81,7 @@ def get_allowed_courses(conflict_graph: Dict[str, Set[str]], already_selected: S
     return all_courses.difference(prohibited)
 
 def generate_schedules(course_df: pd.DataFrame, conflict_graph: Dict[str, Set[str]], already_selected: List[str],\
-    requirements: List[Set[str]]) -> List:
+    requirements: List[Set[str]], prohibited: Set[str]) -> List:
     """
     Recursively generates all the schedules with given requirements.
     """
@@ -92,7 +92,7 @@ def generate_schedules(course_df: pd.DataFrame, conflict_graph: Dict[str, Set[st
     # and try adding in all its courses (separately).
     schedules = []
 
-    allowed = get_allowed_courses(conflict_graph, set(already_selected))
+    allowed = get_allowed_courses(conflict_graph, set(already_selected), prohibited)
     # Deal with shorter requirements first: may not matter? Needs performance testing.
     requirements.sort(key=len)
     # Consider courses from a given requirement (the first) that do not conflict with those chosen.
@@ -116,21 +116,27 @@ def generate_schedules(course_df: pd.DataFrame, conflict_graph: Dict[str, Set[st
         if add_requirement:
             new_requirements.append(also_register)
         # Add the new course to the list of already selected ones.
-        schedules.append(generate_schedules(course_df, conflict_graph, already_selected + [addition], new_requirements))
+        schedules.append(generate_schedules(course_df, conflict_graph, already_selected + [addition], new_requirements, prohibited))
     return schedules
 
 def generate_with_electives(course_df: pd.DataFrame, conflict_graph: Dict[str, Set[str]],\
-    requirements: List[Set[str]], elective_requirements: List[Set[str]], elective_count: int) -> Set[FrozenSet[str]]:
+    requirements: List[Set[str]], elective_requirements: List[Set[str]],
+    prohibited: Set[str], elective_count: int) -> Set[FrozenSet[str]]:
     """
     Recursively generates all valid schedules meeting the requirements, including a number elective_count of
     requirements in elective_requirements.
     """
     schedules = set()
-    for combination in combinations(elective_requirements, elective_count):
-        combination = list(combination)
-        new_schedules = generate_schedules(course_df, conflict_graph, [], requirements + combination)
+    if elective_count > 0:
+        for combination in combinations(elective_requirements, elective_count):
+            combination = list(combination)
+            new_schedules = generate_schedules(course_df, conflict_graph, [], requirements + combination, prohibited)
+            flattened = set(flatten(new_schedules))
+            print(len(flattened))
+            schedules = schedules.union(flattened)
+    else:
+        new_schedules = generate_schedules(course_df, conflict_graph, [], requirements, prohibited)
         flattened = set(flatten(new_schedules))
-        print(len(flattened))
         schedules = schedules.union(flattened)
     print(len(schedules))
     return schedules
@@ -149,9 +155,10 @@ def schedule(course_df_path: str, query_path: str) -> Set[FrozenSet[str]]:
     courses = query["courses"]
     electives = query["electives"]
     elective_count = query["electiveCount"]
+    prohibited = set(query["prohibited"])
     requirements = [list(get_lecture_set(df, course)) for course in courses]
     elective_requirements = [list(get_lecture_set(df, elective)) for elective in electives]
-    schedules = generate_with_electives(df, conflicts, requirements, elective_requirements, elective_count)
+    schedules = generate_with_electives(df, conflicts, requirements, elective_requirements, prohibited, elective_count)
     return schedules
 
 def coverage_sample(schedules: Set[FrozenSet[str]], size: int) -> Set[FrozenSet[str]]:
@@ -180,5 +187,7 @@ def coverage_sample(schedules: Set[FrozenSet[str]], size: int) -> Set[FrozenSet[
     return selected
 
 if __name__ == "__main__":
-    schedules = schedule("results.csv", "query.json")
+    schedules = schedule("test/results.csv", "test/test_query.json")
     print(coverage_sample(schedules, 5))
+    print()
+    print(section_counts(schedules))
