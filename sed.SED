@@ -23,14 +23,14 @@ SourceFiles=SourceFiles
 [Strings]
 InstallPrompt=
 DisplayLicense=
-FinishMessage=Finished installing.
-TargetName=D:\Users\Andrei\Minor_Projects\Schedule_Generator\dist\new_gui.exe
-FriendlyName=Carleton Schedule Creator
+FinishMessage=Finished installing Carleton Schedule Generator.
+TargetName=D:\Users\Andrei\Minor_Projects\Schedule_Generator\dist\Application.exe
+FriendlyName=Carleton Schedule Generator
 AppLaunched=
 PostInstallCmd=
 AdminQuietInstCmd=
 UserQuietInstCmd=
-FILE0="new_gui.exe"
+FILE0="Application.exe"
 [SourceFiles]
 SourceFiles0=D:\Users\Andrei\Minor_Projects\Schedule_Generator\dist\
 [SourceFiles0]
