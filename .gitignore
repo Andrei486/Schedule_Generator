@@ -1,4 +1,6 @@
 venv/
+dist/
+build/
 
 *.json
 *.csv

@@ -13,6 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from utilities import resource_path
 
 START_PAGE = r"https://central.carleton.ca/prod/bwysched.p_select_term?wsea_code=EXT"
 
@@ -37,7 +38,7 @@ def get_driver() -> webdriver:
     # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options, executable_path=resource_path("chromedriver"))
     return driver
 
 def go_to_term(driver: webdriver, termName: str) -> webdriver:

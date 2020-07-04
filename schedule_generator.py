@@ -168,6 +168,8 @@ def coverage_sample(schedules: Set[FrozenSet[str]], size: int) -> Set[FrozenSet[
     """
     
     selected = set()
+    if size >= len(schedules):
+        return schedules
     while len(selected) < size:
         # Find the current coverage.
         coverage = set()
@@ -188,6 +190,6 @@ def coverage_sample(schedules: Set[FrozenSet[str]], size: int) -> Set[FrozenSet[
 
 if __name__ == "__main__":
     schedules = schedule("test/results.csv", "test/test_query.json")
-    print(coverage_sample(schedules, 5))
+    print(coverage_sample(schedules, 17))
     print()
     print(section_counts(schedules))

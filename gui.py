@@ -52,7 +52,7 @@ def make_schedules() -> tk.Toplevel:
             text.config(fg="black", text="")
             all_schedules = schedule(course_file.get(), query_file.get())
             to_dataframe(all_schedules).to_csv(output_full)
-            sample_schedules = coverage_sample(all_schedules, 5)
+            sample_schedules = coverage_sample(all_schedules, sample_size)
             to_dataframe(sample_schedules).to_csv(output_sample)
             if open_output.get():
                 subprocess.run(['start', output_sample], check=True, shell=True)
@@ -392,7 +392,7 @@ def main_window() -> None:
     master.protocol("WM_DELETE_WINDOW", master.quit)
     tk.mainloop()
     
-
-root = tk.Tk()
-root.withdraw()
-main_window()
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.withdraw()
+    main_window()
