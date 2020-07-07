@@ -183,8 +183,9 @@ class QueryCreator(tk.Frame):
                 df = search_from_query(QUERY_PATH)
                 courses_to_csv(df, RESULTS_PATH)
                 warning_text.config(fg="black", text="Search successful.")
-            except:
+            except Exception as e:
                 warning_text.config(fg="red", text="Something went wrong with the search.")
+                print(e)
 
         # Make frame for selecting general options
         extra_options = ttk.Frame(self, style=f"{style}.TFrame")

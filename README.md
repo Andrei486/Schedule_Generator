@@ -3,9 +3,10 @@
 ---
 
 ## Current Version
-Version 1.0.0, July 4 2020
+Version 1.0.1, July 7 2020
 ## History
-Version 1.0.0, July 4 2020
+- Version 1.0.0, July 4 2020: base functionality
+- Version 1.0.1, July 7 2020: fixed an issue in which prohibited sections would be ignored
 
 ## Information
 This project can be reached at apopescu486@gmail.com.
@@ -28,6 +29,7 @@ The application will generate files in the same folder it is placed in. Two of t
 
 ## Known Issues
 - The first time the application is used to make a search, Windows may ask for permission to open a browser. This will cause the search to fail, regardless of whether permission is granted. The user must exit the application and return to it in order to properly execute the search.
+- The generator may schedule sections shown as "Open" even though all remaining seats are reserved by the Department.
 
 ## Credits
 Andrei Popescu (apopescu486@gmail.com)

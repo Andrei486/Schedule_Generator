@@ -75,7 +75,7 @@ def get_allowed_courses(conflict_graph: Dict[str, Set[str]], already_selected: S
     already_selected, according to the graph conflict_graph.
     """
     all_courses = set(conflict_graph.keys())
-    prohibited = already_selected.copy()
+    prohibited = already_selected.copy().union(prohibited)
     for course in already_selected:
         prohibited = prohibited.union(conflict_graph[course])
     return all_courses.difference(prohibited)
