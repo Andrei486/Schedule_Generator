@@ -92,7 +92,7 @@ def to_series(schedule: FrozenSet[str], max_courses: int) -> pd.Series:
         data.append(None)
     return pd.Series(data=data, index=index)
 
-def resource_path(relative_path):
+def resource_path(relative_path) -> str:
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
@@ -102,7 +102,7 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-def driver_path():
+def driver_path() -> str:
     """ Get absolute path to chromedriver, in dev or PyInstaller. """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
