@@ -201,7 +201,7 @@ def coverage_sample(schedules: Set[FrozenSet[str]], size: int) -> Set[FrozenSet[
     return selected
 
 if __name__ == "__main__":
-    schedules = schedule("test/results.csv", "test/test_query.json")
+    schedules = schedule("results.csv", "query.json")
     print(coverage_sample(schedules, 17))
     print()
     print(section_counts(schedules))
