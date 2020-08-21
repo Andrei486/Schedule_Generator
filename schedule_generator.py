@@ -9,7 +9,6 @@ from arrow import Arrow
 import pandas as pd
 import timeit
 from utilities import *
-from course_finder import CourseInfo
 
 def preprocess(course_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -22,25 +21,17 @@ def preprocess(course_df: pd.DataFrame) -> pd.DataFrame:
     course_df = course_df.set_index("CourseID")
     return course_df
 
-def get_lecture_set(course_df: pd.DataFrame, course_id: str) -> Set[str]:
+def get_lecture_set(course_df: pd.DataFrame, courseID: str) -> Set[str]:
     """
-    Returns the set of all lecture section names in course_df in the course course_id.
+    Returns the set of all lecture section names in course_df in the course courseID.
     Course ID format is XXXX 0000 (e.g., ELEC 2501).
     """
     lecture_sections = set()
     course_df.sort_index()
     for section_name in course_df.index:
-        if course_id in section_name and course_df.loc[section_name]["Type"] not in {"Laboratory", "Tutorial"}:
+        if courseID in section_name and course_df.loc[section_name]["Type"] in {"Lecture", "Seminar"}:
             lecture_sections.add(section_name)
     return lecture_sections
-
-def is_scheduled(course: CourseInfo) -> bool:
-    """
-    Returns True if and only if the course course, contained in course_df,
-    has a scheduled time and day.
-    """
-    return course.Day is None or course.Day2 is None or course.Start is None or course.End is None
-    
 
 def is_conflict(course_df: pd.DataFrame, course1: str, course2: str) -> bool:
     """
@@ -49,12 +40,9 @@ def is_conflict(course_df: pd.DataFrame, course1: str, course2: str) -> bool:
     """
     c1 = course_df.loc[course1]
     c2 = course_df.loc[course2]
-    if not is_scheduled(c1) or not is_scheduled(c2):
-        return False # Cannot have a conflict if one course does not have a scheduled time
-    
     # Conflicts cannot occur if the two courses do not share a weekday at least
-    days1 = {int(day) for day in {c1.Day, c1.Day2} if not pd.isna(day)}
-    days2 = {int(day) for day in {c2.Day, c2.Day2} if not pd.isna(day)}
+    days1 = {int(day) for day in {c1["Day"], c1["Day2"]} if not pd.isna(day)}
+    days2 = {int(day) for day in {c2["Day"], c2["Day2"]} if not pd.isna(day)}
 
     if not days1.intersection(days2):
         return False

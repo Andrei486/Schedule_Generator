@@ -63,7 +63,7 @@ def go_to_term(driver: webdriver, termName: str) -> webdriver:
     return driver
 
 
-def execute_search(driver: webdriver, subject: str, number: str, open_only: bool=True) -> webdriver:
+def execute_search(driver: webdriver, subject: str, number: str) -> webdriver:
     """
     Subject can be either the full name (Mathematics) or the four letter id (MATH).
     Either way, the match must be exact, so ids are preferred.
@@ -91,11 +91,10 @@ def execute_search(driver: webdriver, subject: str, number: str, open_only: bool
     numberBox = driver.find_element_by_css_selector(r"#number_id")
     numberBox.send_keys(number)
 
-    if open_only:
-        # only search for open courses
-        driver.find_element_by_css_selector(r'#special_id > option[value="O"]').click()
-        # disable the "search for all courses" option
-        driver.find_element_by_css_selector(r'#special_id > option[value="N"]').click()
+    # only search for open courses
+    driver.find_element_by_css_selector(r'#special_id > option[value="O"]').click()
+    # disable the "search for all courses" option
+    driver.find_element_by_css_selector(r'#special_id > option[value="N"]').click()
 
     # start the search
     driver.find_element_by_css_selector(
@@ -165,48 +164,34 @@ def get_course_from_rows(rows: list) -> CourseInfo:
     idWithSection = courseID + mainRow[4].get_text().strip()
     courseType = mainRow[7].get_text()
 
-    scheduleInfo = rows[1].select_one('td[colspan]').get_text() if len(rows) >= 2 else ""
-    
-    if scheduleInfo:
-        times = re.search(string = scheduleInfo, pattern = r"([0-9]{2}:[0-9]{2})\s*-\s*([0-9]{2}:[0-9]{2})")
-        if times:
-            times = times.groups()
-            startTime = times[0]
-            endTime = times[1]
+    scheduleInfo = rows[1].select_one('td[colspan]').get_text()
+    times = re.search(string = scheduleInfo, pattern = r"([0-9]{2}:[0-9]{2})\s*-\s*([0-9]{2}:[0-9]{2})").groups()
     # Parse as time objects
     # startTime = time.strptime(times[0], "%H:%M")
     # endTime = time.strptime(times[1], "%H:%M")
-        else:
-            startTime = None
-            endTime = None
+    startTime = times[0]
+    endTime = times[1]
 
-        weekdays = re.search(string = scheduleInfo, pattern = r"(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Mon|Tue|Wed|Thu|Fri|Sat|Sun)*")
-        weekdays = weekdays.groups() if weekdays else []
-        day = weekdays[0] if len(weekdays) >= 1 else None
-        secondDay = weekdays[1] if len(weekdays) >= 2 else None
+    weekdays = re.search(string = scheduleInfo, pattern = r"(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Mon|Tue|Wed|Thu|Fri|Sat|Sun)*").groups()
+    day = weekdays[0]
+    secondDay = weekdays[1] if len(weekdays) >= 2 else None
     
-        alsoRegisterInfo = rows[2].select_one('td[colspan]').get_text()
+    alsoRegisterInfo = rows[2].select_one('td[colspan]').get_text()
 
-        alsoRegister = set()
-        if "Also Register in:" in alsoRegisterInfo:
-            # Remove base course name and "also register in"
-            alsoRegisterInfo = re.sub(string = alsoRegisterInfo, pattern = "Also Register in:", repl="").strip()
-            alsoRegisterInfo = re.sub(string = alsoRegisterInfo, pattern = courseID, repl="").strip()
-            # Match section names
-            
-            for match in re.finditer(string = alsoRegisterInfo, pattern = r"([A-Z][A-Z]*[0-9]*)"):
-                alsoRegister.add(courseID + match.groups()[0])
-    else:
-        startTime = None
-        endTime = None
-        day = None
-        secondDay = None
-        alsoRegister = set()
+    alsoRegister = set()
+    if "Also Register in:" in alsoRegisterInfo:
+        # Remove base course name and "also register in"
+        alsoRegisterInfo = re.sub(string = alsoRegisterInfo, pattern = "Also Register in:", repl="").strip()
+        alsoRegisterInfo = re.sub(string = alsoRegisterInfo, pattern = courseID, repl="").strip()
+        # Match section names
+        
+        for match in re.finditer(string = alsoRegisterInfo, pattern = r"([A-Z][A-Z]*[0-9]*)"):
+            alsoRegister.add(courseID + match.groups()[0])
     
     return CourseInfo(courseID=idWithSection, courseType=courseType, day=day, secondDay=secondDay,\
         startTime=startTime, endTime=endTime, alsoRegister=alsoRegister)
 
-def full_search(term: str, subject: str = "", number: str = "", open_only: bool=True) -> pd.DataFrame:
+def full_search(term: str, subject: str = "", number: str = "") -> pd.DataFrame:
     """
     Returns a DataFrame where the rows are all the CourseInfo objects for
     the courses returned by the search for the given subject and number.
@@ -233,7 +218,8 @@ def search_all(term: str, courses: Set[str]) -> pd.DataFrame:
     """
     results = pd.DataFrame()
     for course in courses:
-        subject, number = parse_code(course)
+        subject = course[0:4]
+        number = course[5:9]
         print(subject, number)
         results = pd.concat([results, full_search(term, subject, number)])
     return results
@@ -261,15 +247,6 @@ def search_from_query(filename: str) -> pd.DataFrame:
     print(to_search)
     term = query["term"]
     return search_all(term, to_search)
-
-def parse_code(course_code: str) -> Tuple[str, str]:
-    """
-    Parses a course code of the form XXXX 0000 into a course subject and number.
-    """
-    info = re.search(string=course_code, pattern=r"([A-Z]{3,4})[ ]{0,1}([0-9]{4})").groups()
-    subj = info[0]
-    num = info[1] if len(info) > 1 else ""
-    return (subj, num)
 
 if __name__ == "__main__":
     df = search_from_query("query.json")
