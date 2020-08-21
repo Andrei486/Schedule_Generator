@@ -30,7 +30,7 @@ def get_lecture_set(course_df: pd.DataFrame, course_id: str) -> Set[str]:
     lecture_sections = set()
     course_df.sort_index()
     for section_name in course_df.index:
-        if course_id in section_name and course_df.loc[section_name]["Type"] in {"Lecture", "Seminar"}:
+        if course_id in section_name and course_df.loc[section_name]["Type"] not in {"Laboratory", "Tutorial"}:
             lecture_sections.add(section_name)
     return lecture_sections
 
