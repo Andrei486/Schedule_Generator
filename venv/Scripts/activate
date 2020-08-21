@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\Users\Andrei\Minor_Projects\Schedule_Generator\venv"
+VIRTUAL_ENV="C:\Users\apope\Documents\GitHub\Schedule_Generator\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

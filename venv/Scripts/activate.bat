@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=D:\Users\Andrei\Minor_Projects\Schedule_Generator\venv
+set VIRTUAL_ENV=C:\Users\apope\Documents\GitHub\Schedule_Generator\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
