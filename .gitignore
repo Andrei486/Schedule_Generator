@@ -1,6 +1,7 @@
 venv/
 dist/
 build/
-
+.vscode/
+__pycache__/
 *.json
 *.csv
