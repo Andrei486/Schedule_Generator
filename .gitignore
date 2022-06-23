@@ -5,3 +5,5 @@ build/
 __pycache__/
 *.json
 *.csv
+[0-9]*/
+sed.SED

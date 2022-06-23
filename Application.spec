@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['Application.py'],
-             pathex=['D:\\Users\\Andrei\\Minor_Projects\\Schedule_Generator'],
+             pathex=['C:\\Users\\apope\\Documents\\GitHub\\Schedule_Generator'],
              binaries=[],
-             datas=[('chromedriver.exe', '.'), ('wingicon.ico', '.')],
+             datas=[('wingicon.ico', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
