@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from utilities import resource_path, driver_path
+import chromedriver_autoinstaller
 
 START_PAGE = r"https://central.carleton.ca/prod/bwysched.p_select_term?wsea_code=EXT"
 
@@ -27,21 +28,23 @@ class CourseInfo(pd.Series):
         super().__init__(data=data, index=index)
 
 
-def get_driver() -> webdriver:
+def get_driver() -> webdriver.Chrome:
     """
     Creates and returns a Selenium-controller headless browser session
     on Chrome. Only call this once.
     """
+    chromedriver_autoinstaller.install(cwd=True)
+
     chrome_options = Options()
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-gpu")
     # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path())
+    driver = webdriver.Chrome(options=chrome_options)
     return driver
 
-def go_to_term(driver: webdriver, termName: str) -> webdriver:
+def go_to_term(driver: webdriver.Chrome, termName: str) -> webdriver.Chrome:
     """
     Examples of term names are Fall 2019, Winter 2020, Summer 2020.
     """
@@ -63,7 +66,7 @@ def go_to_term(driver: webdriver, termName: str) -> webdriver:
     return driver
 
 
-def execute_search(driver: webdriver, subject: str, number: str) -> webdriver:
+def execute_search(driver: webdriver.Chrome, subject: str, number: str) -> webdriver.Chrome:
     """
     Subject can be either the full name (Mathematics) or the four letter id (MATH).
     Either way, the match must be exact, so ids are preferred.
@@ -108,7 +111,7 @@ def execute_search(driver: webdriver, subject: str, number: str) -> webdriver:
     return driver
 
 
-def is_valid_results(driver: webdriver) -> bool:
+def is_valid_results(driver: webdriver.Chrome) -> bool:
     """
     Returns True if and only if the current page of driver is a valid course
     results page (waits for it to load first).
@@ -129,7 +132,7 @@ def is_valid_results(driver: webdriver) -> bool:
             return True
 
 
-def get_course_info(driver: webdriver) -> pd.DataFrame:
+def get_course_info(driver: webdriver.Chrome) -> pd.DataFrame:
     """
     Returns the DataFrame of CourseInfo objects corresponding to the current page's
     search results.
@@ -185,7 +188,7 @@ def get_course_from_rows(rows: list) -> CourseInfo:
         alsoRegisterInfo = re.sub(string = alsoRegisterInfo, pattern = courseID, repl="").strip()
         # Match section names
         
-        for match in re.finditer(string = alsoRegisterInfo, pattern = r"([A-Z][A-Z]*[0-9]*)"):
+        for match in re.finditer(string = alsoRegisterInfo, pattern = r"([A-Z0-9]+)"):
             alsoRegister.add(courseID + match.groups()[0])
     
     return CourseInfo(courseID=idWithSection, courseType=courseType, day=day, secondDay=secondDay,\
@@ -196,6 +199,7 @@ def full_search(term: str, subject: str = "", number: str = "") -> pd.DataFrame:
     Returns a DataFrame where the rows are all the CourseInfo objects for
     the courses returned by the search for the given subject and number.
     """
+    driver = None
     try:
         driver = get_driver()
         driver = go_to_term(driver, term)

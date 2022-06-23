@@ -24,7 +24,7 @@ SourceFiles=SourceFiles
 InstallPrompt=
 DisplayLicense=
 FinishMessage=Finished installing Carleton Schedule Generator.
-TargetName=D:\Users\Andrei\Minor_Projects\Schedule_Generator\dist\Application.exe
+TargetName=C:\Users\apope\Documents\GitHub\Schedule_Generator\Application.exe
 FriendlyName=Carleton Schedule Generator
 AppLaunched=
 PostInstallCmd=
@@ -32,6 +32,6 @@ AdminQuietInstCmd=
 UserQuietInstCmd=
 FILE0="Application.exe"
 [SourceFiles]
-SourceFiles0=D:\Users\Andrei\Minor_Projects\Schedule_Generator\dist\
+SourceFiles0=C:\Users\apope\Documents\GitHub\Schedule_Generator\dist\
 [SourceFiles0]
 %FILE0%=

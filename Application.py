@@ -58,7 +58,7 @@ class CourseSelector(tk.Frame):
     def __init__(self, parent, style="Basic", *args, **options):
         tk.Frame.__init__(self, parent, *args, **options)
         new_course_frame = ttk.Frame(self, style=f"{style}.TFrame")
-        ttk.Label(new_course_frame, text="Course Subject (4 letters)", style=f"{style}.TLabel").grid(row=0, column=0, padx=4, pady=4)
+        ttk.Label(new_course_frame, text="Course Subject (3-4 letters)", style=f"{style}.TLabel").grid(row=0, column=0, padx=4, pady=4)
         course_subj = ttk.Entry(new_course_frame, style=f"{style}.TEntry")
         course_subj.grid(row=0, column=1, padx=4, pady=4)
         ttk.Label(new_course_frame, text="Course Number (4 digits)", style=f"{style}.TLabel").grid(row=0, column=2, padx=4, pady=4)
@@ -87,7 +87,9 @@ class CourseSelector(tk.Frame):
         """
         if number and subj:
             existing_courses = self.get_courses()
-            self.write_courses(existing_courses + [f"{subj[0:4]} {number[0:4]}"])
+            if len(subj) > 4:
+                subj = subj[:4]
+            self.write_courses(existing_courses + [f"{subj} {number[:4]}"])
         return
 
     def remove_course(self) -> None:
@@ -134,7 +136,9 @@ class SectionSelector(CourseSelector):
         """
         if number and subj:
             existing_courses = self.get_courses()
-            self.write_courses(existing_courses + [f"{subj[0:4]} {number[0:4]} {section}"])
+            if len(subj) > 4:
+                subj = subj[:4]
+            self.write_courses(existing_courses + [f"{subj} {number[:4]} {section}"])
         return
 
 class QueryCreator(tk.Frame):

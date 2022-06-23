@@ -1,5 +1,6 @@
 from typing import *
 import os
+import sys
 from collections import defaultdict
 import pandas as pd
 from tkinter import *
@@ -101,16 +102,3 @@ def resource_path(relative_path) -> str:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
-
-def driver_path() -> str:
-    """ Get absolute path to chromedriver, in dev or PyInstaller. """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = ""
-
-    return os.path.join(base_path, "chromedriver")
-
-if __name__ == "__main__":
-    print(driver_path())
